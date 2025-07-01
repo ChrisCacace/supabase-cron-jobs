@@ -1,0 +1,27 @@
+{
+  "name": "supabase-cron-jobs",
+  "version": "1.0.0",
+  "description": "Supabase Edge Functions for Dutchie inventory sync",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test-function.js",
+    "dev": "supabase start",
+    "deploy": "supabase functions deploy fetch-dutchie-inventory",
+    "logs": "supabase functions logs fetch-dutchie-inventory"
+  },
+  "keywords": [
+    "supabase",
+    "edge-functions",
+    "dutchie",
+    "inventory",
+    "cron"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "node-fetch": "^2.6.7"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+} 

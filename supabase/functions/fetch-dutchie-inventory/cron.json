@@ -1,0 +1,4 @@
+{
+  "cron": "*/15 * * * *",
+  "function": "fetch-dutchie-inventory"
+} 
