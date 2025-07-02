@@ -16,32 +16,37 @@ serve(async (req) => {
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    
+    console.log('Supabase URL:', supabaseUrl)
+    console.log('Service Key exists:', !!supabaseServiceKey)
+    
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    // For now, hardcode a test API key (you can replace this with fetching from users table)
-    const dutchieApiKey = '0de39f48f069435dbdb9b169609ba9ac' // Replace with actual API key
+    // Fetch raw API key from profiles table
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('dutchie_api_key')
+      .not('dutchie_api_key', 'is', null)
+      .limit(1)
+      .single()
     
-    // Alternative: Fetch API key from first user in users table
-    // const { data: users, error: userError } = await supabase
-    //   .from('users')
-    //   .select('dutchie_api_key')
-    //   .not('dutchie_api_key', 'is', null)
-    //   .limit(1)
-    //   .single()
+    console.log('Profile query result:', { profile, profileError })
     
-    // if (userError || !users?.dutchie_api_key) {
-    //   throw new Error('No Dutchie API key found in users table')
-    // }
-    // const dutchieApiKey = users.dutchie_api_key
-
+    if (profileError || !profile?.dutchie_api_key) {
+      throw new Error('No Dutchie API key found in profiles table')
+    }
+    
+    const apiKey = profile.dutchie_api_key
+    // Generate Basic Auth header dynamically
+    const authHeader = 'Basic ' + btoa(`${apiKey}:`)
+    
     // Dutchie API endpoint for inventory
     const dutchieInventoryUrl = 'https://api.pos.dutchie.com/reporting/inventory'
-    
     // Make request to Dutchie API
     const response = await fetch(dutchieInventoryUrl, {
       method: 'GET',
       headers: {
-        'Authorization': 'Basic MGRlMzlmNDhmMDY5NDM1ZGJkYjliMTY5NjA5YmE5YWM=',
+        'Authorization': authHeader,
         'Content-Type': 'application/json',
         'User-Agent': 'Supabase-Edge-Function/1.0'
       }
