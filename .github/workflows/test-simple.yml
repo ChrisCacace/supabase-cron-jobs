@@ -1,0 +1,28 @@
+name: Simple Test
+
+on:
+  workflow_dispatch: # Manual trigger only
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Test Edge Function
+      run: |
+        echo "Testing edge function..."
+        
+        # Test without the secret first
+        echo "Testing without secret..."
+        curl -X POST https://zpfrcsydbgxssojtsefg.supabase.co/functions/v1/fetch-dutchie-inventory \
+          -H "Content-Type: application/json" \
+          -d '{}' || echo "Failed without auth"
+        
+        echo "Testing with secret..."
+        # Test with the secret
+        curl -X POST https://zpfrcsydbgxssojtsefg.supabase.co/functions/v1/fetch-dutchie-inventory \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+          -H "Content-Type: application/json" \
+          -d '{}' || echo "Failed with auth"
+        
+        echo "Test completed" 
