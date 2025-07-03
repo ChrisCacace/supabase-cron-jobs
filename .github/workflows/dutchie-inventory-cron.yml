@@ -15,7 +15,17 @@ jobs:
       run: |
         echo "Starting Dutchie inventory fetch at $(date)"
         
+        # Debug: Check if secret is available (without exposing it)
+        if [ -z "${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" ]; then
+          echo "❌ SUPABASE_SERVICE_ROLE_KEY secret is not set!"
+          exit 1
+        else
+          echo "✅ SUPABASE_SERVICE_ROLE_KEY secret is available"
+        fi
+        
         # Make the HTTP request to the Supabase Edge Function
+        echo "Making request to Supabase Edge Function..."
+        
         response=$(curl -s -w "\n%{http_code}" -X POST \
           https://zpfrcsydbgxssojtsefg.supabase.co/functions/v1/fetch-dutchie-inventory \
           -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
@@ -34,6 +44,7 @@ jobs:
           echo "✅ Dutchie inventory fetch completed successfully"
         else
           echo "❌ Dutchie inventory fetch failed with status code: $http_code"
+          echo "This might be due to an invalid or expired JWT token"
           exit 1
         fi
       
