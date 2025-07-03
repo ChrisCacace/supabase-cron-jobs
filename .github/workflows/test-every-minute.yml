@@ -1,0 +1,26 @@
+name: Test Every Minute
+
+on:
+  schedule:
+    # Run every minute for testing
+    - cron: '* * * * *'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Test Run
+      run: |
+        echo "🕐 Test workflow executed at $(date)"
+        echo "This should run every minute if GitHub Actions scheduling is working"
+        
+        # Also test the edge function
+        echo "Testing edge function..."
+        curl -X POST https://zpfrcsydbgxssojtsefg.supabase.co/functions/v1/fetch-dutchie-inventory \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+          -H "Content-Type: application/json" \
+          -d '{}' || echo "Edge function test failed"
+        
+        echo "Test completed at $(date)" 
