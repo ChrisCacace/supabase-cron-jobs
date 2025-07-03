@@ -1,0 +1,31 @@
+name: Simple Cron Test
+
+on:
+  schedule:
+    - cron: '*/3 * * * *'  # Every 3 minutes
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Simple Cron Test
+        run: |
+          echo "🔍 SIMPLE CRON TEST"
+          echo "=================="
+          echo "Event: ${{ github.event_name }}"
+          echo "Time: $(date -u)"
+          echo "Repository: ${{ github.repository }}"
+          echo ""
+          
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            echo "✅ CRON IS WORKING!"
+            echo "Scheduled workflows are functioning correctly."
+          else
+            echo "⚠️  MANUAL TRIGGER"
+            echo "This was triggered manually, not by cron."
+          fi
+          
+          echo ""
+          echo "📅 Next scheduled run in ~3 minutes"
+          echo "🕐 Current UTC time: $(date -u)" 
