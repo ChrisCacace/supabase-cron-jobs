@@ -1,4 +1,4 @@
-name: Dutchie Inventory Cron (Fixed)
+name: Dutchie Inventory Cron
 
 # This is the main cron job that runs every 15 minutes
 on:
