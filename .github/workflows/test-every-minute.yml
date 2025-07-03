@@ -9,7 +9,24 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
+      - name: Check if scheduled run
+        run: |
+          echo "🔍 DIAGNOSTIC INFO:"
+          echo "Event: ${{ github.event_name }}"
+          echo "Repository: ${{ github.repository }}"
+          echo "Visibility: ${{ github.repository_visibility }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Actor: ${{ github.actor }}"
+          
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            echo "✅ This is a scheduled run!"
+          else
+            echo "⚠️  This is a manual trigger"
+          fi
+          
       - name: Echo test message
         run: |
-          echo "✅ This workflow runs every minute!"
-          echo "Current UTC time: $(date -u)" 
+          echo "✅ Test Every Minute workflow executed!"
+          echo "Current UTC time: $(date -u)"
+          echo "Current local time: $(date)"
+          echo "Next scheduled run should be in ~1 minute" 
