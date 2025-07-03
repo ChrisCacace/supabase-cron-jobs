@@ -1,0 +1,66 @@
+name: Dutchie Inventory Cron (Fixed)
+
+# This is the main cron job that runs every 15 minutes
+on:
+  schedule:
+    # Run every 15 minutes (at :00, :15, :30, :45 of every hour)
+    - cron: '0,15,30,45 * * * *'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  fetch-inventory:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Check if scheduled run
+      run: |
+        if [ "${{ github.event_name }}" = "schedule" ]; then
+          echo "✅ This is a scheduled cron run"
+        else
+          echo "⚠️  This is a manual trigger"
+        fi
+        echo "🕐 Current time: $(date)"
+        echo "📅 Next scheduled runs:"
+        echo "  - At minute 0, 15, 30, 45 of every hour"
+        
+    - name: Validate secrets
+      run: |
+        if [ -z "${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" ]; then
+          echo "❌ SUPABASE_SERVICE_ROLE_KEY secret is missing!"
+          exit 1
+        else
+          echo "✅ SUPABASE_SERVICE_ROLE_KEY secret is available"
+        fi
+        
+    - name: Trigger Dutchie Inventory Fetch
+      run: |
+        echo "🚀 Starting Dutchie inventory fetch..."
+        
+        # Make the HTTP request to the Supabase Edge Function
+        response=$(curl -s -w "\n%{http_code}" -X POST \
+          https://zpfrcsydbgxssojtsefg.supabase.co/functions/v1/fetch-dutchie-inventory \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+          -H "Content-Type: application/json" \
+          -d '{}' 2>/dev/null || echo "Request failed")
+        
+        # Extract the response body and status code
+        http_code=$(echo "$response" | tail -n1)
+        response_body=$(echo "$response" | head -n -1)
+        
+        echo "📊 HTTP Status Code: $http_code"
+        echo "📄 Response: $response_body"
+        
+        # Check if the request was successful
+        if [ "$http_code" = "200" ]; then
+          echo "✅ Dutchie inventory fetch completed successfully"
+        else
+          echo "❌ Dutchie inventory fetch failed with status code: $http_code"
+          echo "💡 This might be due to an invalid or expired JWT token"
+          exit 1
+        fi
+      
+    - name: Log completion
+      run: |
+        echo "🏁 Dutchie inventory fetch completed at $(date)"
+        echo "📋 Check Supabase Edge Function logs for detailed results"
+        echo "🔄 Next scheduled run will be in ~15 minutes" 
