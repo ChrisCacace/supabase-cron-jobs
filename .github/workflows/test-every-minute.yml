@@ -1,0 +1,15 @@
+name: Test Every Minute
+
+on:
+  schedule:
+    - cron: '* * * * *'  # Every minute
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo test message
+        run: |
+          echo "✅ This workflow runs every minute!"
+          echo "Current UTC time: $(date -u)" 
